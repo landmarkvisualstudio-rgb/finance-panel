@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>پنل مالی</title>
+  <meta name="description" content="پنل مالی شخصی: هزینه، درآمد، طلب، بدهی، خریدهای آینده و قیمت لحظه‌ای بازار">
+  <meta name="theme-color" content="#050506">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="پنل مالی">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // اعمال تم قبل از رندر برای جلوگیری از پرش رنگ
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem('fp.settings.v1') || '{}');
+        var t = s.theme || 'system';
+        var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (e) { document.documentElement.dataset.theme = 'dark'; }
+    })();
+  </script>
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
+  <header class="topbar glass" id="topbar"></header>
+  <nav class="tabbar glass" id="nav" aria-label="منوی اصلی"></nav>
+  <main id="view" class="view"></main>
+  <div id="sheet-root" hidden></div>
+  <div id="lock" class="lock glass-heavy" hidden></div>
+  <div id="toast" class="toast glass" role="status" aria-live="polite"></div>
+  <noscript>برای استفاده از پنل، جاوااسکریپت را فعال کنید.</noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
