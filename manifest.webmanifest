@@ -4,6 +4,7 @@
   "description": "پنل مالی شخصی: هزینه، درآمد، طلب، بدهی، خریدهای آینده و قیمت لحظه‌ای بازار",
   "lang": "fa",
   "dir": "rtl",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

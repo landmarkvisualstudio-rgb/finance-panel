@@ -164,6 +164,7 @@ function renderShell() {
     <div class="top-actions">
       <button class="icon-btn sync-btn" id="syncBtn" aria-label="همگام‌سازی">${ic('cloud')}<i class="sync-dot"></i></button>
       <button class="icon-btn" id="themeBtn" aria-label="تغییر تم">${ic(document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon')}</button>
+      ${isStandalone() ? '' : `<button class="icon-btn install-btn" id="installBtn" aria-label="نصب اپ" title="نصب اپ">${ic('download')}</button>`}
       <button class="icon-btn" id="settingsBtn" aria-label="تنظیمات">${ic('settings')}</button>
     </div>`;
   $('#nav').innerHTML = `<div class="nav-pill" aria-hidden="true"></div>` + NAV.map((n) => `
@@ -173,6 +174,7 @@ function renderShell() {
     store.saveSettings(); applyTheme(); renderShell(); updateNav(); updateSyncDot();
   };
   $('#settingsBtn').onclick = () => go('settings');
+  $('#installBtn')?.addEventListener('click', installApp);
   $('#syncBtn').onclick = () => {
     if (!syncEnabled()) { go('settings'); toast('برای همگام‌سازی، توکن گیت‌هاب را وارد کن'); return; }
     syncNow(true).then(() => toast(sync.status === 'ok' ? 'همگام شد' : 'خطا: ' + sync.error));
@@ -632,6 +634,11 @@ function viewSettings(v) {
   const s = store.settings;
   v.innerHTML = `
     <div class="page-head"><button class="icon-btn" data-go="home" aria-label="بازگشت">${ic('back')}</button><h1>تنظیمات</h1></div>
+    ${isStandalone() ? '' : `<section class="card settings">
+      <h3>نصب به صورت اپ</h3>
+      <p class="muted small">پنل رو مثل یک اپ روی صفحه‌ی اصلی گوشی یا لپ‌تاپ نصب کن تا بدون مرورگر و تمام‌صفحه باز بشه.</p>
+      <button class="btn primary" id="installBtn2">${ic('download')} نصب اپ</button>
+    </section>`}
     <section class="card settings">
       <h3>ظاهر</h3>
       <div class="segmented theme-seg"><div class="seg-pill"></div>${[['system', 'خودکار'], ['light', 'روشن'], ['dark', 'تیره']].map(([k, l]) => `<button class="seg ${s.theme === k ? 'active' : ''}" data-theme="${k}">${l}</button>`).join('')}</div>
@@ -696,6 +703,7 @@ function viewSettings(v) {
   $('#syncOff', v)?.addEventListener('click', () => { if (confirm('اتصال قطع بشه؟ داده‌های این دستگاه می‌مونه.')) { disconnect(); render(); } });
   $('#saveBrs', v).onclick = async () => { s.brsKey = $('#brs', v).value.trim(); store.saveSettings(); toast('در حال دریافت قیمت…'); await refreshPrices(); toast(prices.errors?.length ? prices.errors[0] : 'قیمت‌ها به‌روز شد'); };
   $('#setPin', v).onclick = () => pinSetup();
+  $('#installBtn2', v)?.addEventListener('click', installApp);
   $('#rmPin', v)?.addEventListener('click', () => { s.pinHash = ''; store.saveSettings(); render(); toast('رمز حذف شد'); });
   $$('[data-rmcat]', v).forEach((b) => (b.onclick = () => { store.data.categories = { list: cats().filter((c) => c !== b.dataset.rmcat), updatedAt: Date.now() }; store.save(); render(); }));
   $('#catAdd', v).onsubmit = (e) => { e.preventDefault(); const n = $('#newCat', v).value.trim(); if (n && !cats().includes(n)) { store.data.categories = { list: [...cats(), n], updatedAt: Date.now() }; store.save(); render(); } };
@@ -764,6 +772,37 @@ function pinSetup() {
 }
 
 /* ---------------- راه‌اندازی ---------------- */
+/* ---------------- نصب اپ (PWA) ---------------- */
+let deferredPrompt = null;
+function isStandalone() {
+  return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+}
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; $('#installBtn')?.classList.add('ready'); });
+window.addEventListener('appinstalled', () => { deferredPrompt = null; toast('اپ نصب شد'); renderShell(); updateNav(); });
+async function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') return;
+  }
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const iosOther = ios && /CriOS|FxiOS|EdgiOS/.test(ua);
+  const android = /Android/.test(ua);
+  const inApp = /Instagram|FBAN|FBAV|Telegram|WhatsApp|Line\//.test(ua);
+  let steps;
+  if (inApp) steps = ['این صفحه داخل مرورگر یک اپ دیگه (مثل تلگرام یا اینستاگرام) باز شده و اونجا نصب ممکن نیست.', 'از منوی ⋮ یا ··· گزینه‌ی «Open in browser» رو بزن تا در Chrome یا Safari باز بشه.', 'بعد دوباره دکمه‌ی نصب رو بزن.'];
+  else if (iosOther) steps = ['در آیفون فقط Safari امکان نصب داره.', 'لینک رو کپی کن و در Safari باز کن.', 'بعد مراحل نصب Safari رو انجام بده.'];
+  else if (ios) steps = ['پایین صفحه‌ی Safari دکمه‌ی <b>Share</b> (مربع با فلش رو به بالا) رو بزن.', 'کمی پایین برو و <b>Add to Home Screen</b> رو انتخاب کن.', 'بالا سمت راست <b>Add</b> رو بزن. آیکون پنل روی صفحه‌ی اصلی میاد.'];
+  else if (android) steps = ['در Chrome، منوی <b>⋮</b> بالا سمت راست رو باز کن.', 'گزینه‌ی <b>Install app</b> یا <b>Add to Home screen</b> رو بزن.', '<b>Install</b> رو تایید کن.', 'اگه این گزینه نبود، مطمئن شو در Chrome هستی (نه مرورگر دیگه) و صفحه رو یک بار رفرش کن.'];
+  else steps = ['در Chrome یا Edge، سمت راست نوار آدرس یک آیکون نصب (مانیتور با فلش) هست، روش بزن.', 'یا از منوی <b>⋮</b> گزینه‌ی <b>Cast, save and share ← Install page as app</b> (یا <b>Apps ← Install</b>) رو بزن.', 'در Safari مک: منوی <b>File ← Add to Dock</b>.', 'Firefox دسکتاپ امکان نصب نداره؛ از Chrome یا Edge استفاده کن.'];
+  openSheet(`
+    <div class="sheet-head"><h2>نصب پنل به صورت اپ</h2><button class="icon-btn" data-close aria-label="بستن">${ic('x')}</button></div>
+    <ol class="install-steps">${steps.map((t) => `<li>${t}</li>`).join('')}</ol>
+    <button class="btn primary" data-close>متوجه شدم</button>`);
+}
+
 function boot() {
   applyTheme();
   parseHash();

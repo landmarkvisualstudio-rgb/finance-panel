@@ -514,3 +514,8 @@ code { font-size: 12px; background: var(--surface-2); padding: 2px 6px; border-r
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass, .tabbar, .topbar, .sheet, .toast, .segmented { background: var(--surface-solid); }
 }
+
+/* ---------- نصب اپ ---------- */
+.install-btn.ready { background: var(--fg); color: var(--bg); }
+.install-steps { margin: 0 0 18px; padding-right: 22px; display: flex; flex-direction: column; gap: 10px; line-height: 1.8; }
+.install-steps b { font-weight: 800; }
