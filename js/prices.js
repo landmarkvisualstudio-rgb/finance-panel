@@ -97,9 +97,22 @@ export function refreshPrices() {
   if (inflight) return inflight;
   inflight = (async () => {
     let got = {}, errors = [];
-    if (store.settings.brsKey) {
-      try { got = await fromBrs(store.settings.brsKey); } catch (e) { errors.push('BrsApi: ' + e.message); }
+    // ۱) قیمت‌هایی که سرور گیت‌هاب هر ۱۵ دقیقه می‌گیرد (هم‌دامنه، بدون نیاز به فیلترشکن)
+    try {
+      const srv = await getJSON('./data/prices.json?t=' + Date.now());
+      const SRC = { tgju: 'tgju.org', TSETMC: 'بورس تهران', BrsApi: 'BrsApi', Nobitex: 'نوبیتکس' };
+      for (const [sym, v] of Object.entries(srv.items || {})) {
+        if (v && v.price && Date.now() - (v.ts || 0) < 6 * 3600e3) got[sym] = { ...v, src: SRC[v.src] || v.src, serverTs: v.ts };
+      }
+    } catch (e) { console.warn('server prices', e); }
+    // ۲) کلید شخصی BrsApi (اختیاری)
+    if (store.settings.brsKey && ASSETS.some((a) => !got[a.sym] || got[a.sym].approx)) {
+      try {
+        const b = await fromBrs(store.settings.brsKey);
+        for (const [k, v] of Object.entries(b)) if (v && (!got[k] || got[k].approx)) got[k] = v;
+      } catch (e) { errors.push('BrsApi: ' + e.message); }
     }
+    // ۳) آخرین راه: مستقیم از نوبیتکس
     const missing = ASSETS.filter((a) => a.sym !== 'TEDPIX' && !got[a.sym]);
     if (missing.length) {
       try {
@@ -111,8 +124,9 @@ export function refreshPrices() {
     let changed = false;
     for (const [sym, v] of Object.entries(got)) {
       if (!v) continue;
-      prices.items[sym] = { ...v, ts: now };
-      if (recordPrice(sym, v.price, now)) changed = true;
+      const ts = v.serverTs || now;
+      prices.items[sym] = { ...v, ts };
+      if (recordPrice(sym, v.price, ts)) changed = true;
     }
     if (Object.keys(got).length) prices.ts = now;
     prices.errors = errors;
@@ -138,6 +152,15 @@ export async function getHistory(sym, rangeId) {
   const range = RANGES.find((r) => r.id === rangeId) || RANGES[2];
   const from = Date.now() - range.days * 864e5;
   const recorded = (store.data.history[sym] || []).filter((p) => p[0] >= from);
+  // تاریخچه‌ای که سرور گیت‌هاب ثبت می‌کند
+  let server = [];
+  try {
+    const h = await getJSON('./data/history.json?t=' + Math.floor(Date.now() / 300e3));
+    server = (h[sym] || []).filter((p) => p[0] >= from);
+  } catch (e) { console.warn('server history', e); }
+  const best = server.length >= recorded.length ? { points: server, source: 'قیمت‌های ثبت‌شده هر ۱۵ دقیقه' } : { points: recorded, source: 'قیمت‌های ثبت‌شده توسط پنل' };
+  const covers = best.points.length > 1 && best.points[best.points.length - 1][0] - best.points[0][0] >= range.days * 864e5 * 0.6;
+  if (covers) return best;
   const nbSym = NB_SYMBOL[sym];
   if (nbSym) {
     try {
@@ -154,5 +177,5 @@ export async function getHistory(sym, rangeId) {
       }
     } catch (e) { console.warn('history', e); }
   }
-  return { points: recorded, source: 'قیمت‌های ثبت‌شده توسط پنل' };
+  return best;
 }

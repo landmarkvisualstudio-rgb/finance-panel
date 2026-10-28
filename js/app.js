@@ -532,7 +532,7 @@ function viewMarket(v) {
       </button>`;
     }).join('')}</div>
     ${prices.errors?.length ? `<p class="muted small err">${esc(prices.errors.join(' · '))}</p>` : ''}
-    ${!store.settings.brsKey ? `<div class="card note"><b>قیمت دقیق بازار آزاد</b><p>الان قیمت‌ها از نوبیتکس (تتر و PAXG) محاسبه می‌شن و تقریبی‌اند. برای قیمت دقیق دلار، طلا و شاخص بورس، یک کلید رایگان از BrsApi.ir بگیر و در تنظیمات وارد کن.</p><button class="btn ghost" data-go="settings">رفتن به تنظیمات</button></div>` : ''}`;
+    ${ASSETS.some((a) => !prices.items[a.sym] || prices.items[a.sym].approx) ? `<div class="card note"><b>بعضی قیمت‌ها کامل نیستن</b><p>قیمت‌ها هر ۱۵ دقیقه از سرور گیت‌هاب به‌روز می‌شن. اگه موردی خالی یا تقریبیه، با وارد کردن کلید رایگان BrsApi.ir در تنظیمات دقیق می‌شه.</p><button class="btn ghost" data-go="settings">رفتن به تنظیمات</button></div>` : ''}`;
   bindCommon(v);
   $('#refresh', v).onclick = async () => {
     $('#refresh', v).classList.add('spin');
