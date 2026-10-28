@@ -97,13 +97,18 @@ def tgju():
         return {'price': p / 10, 'change': ch}
     out = {'USD': item('price_dollar_rl'), 'EUR': item('price_eur'), 'GBP': item('price_gbp'),
            'AED': item('price_aed'), 'G18': item('geram18'), 'G24': item('geram24')}
-    log.append('tgju keys sample: ' + ','.join(k for k in cur if re.search('bourse|shakhes|index', k))[:200])
+    b = cur.get('bourse')
+    if isinstance(b, dict) and num(b.get('p')):
+        ch = num(b.get('dp'))
+        if ch is not None and b.get('dt') == 'low':
+            ch = -abs(ch)
+        out['TEDPIX'] = {'price': num(b.get('p')), 'change': ch}
     return out
 
 
 # ---------- شاخص بورس از TSETMC ----------
 def tsetmc():
-    d = get('https://cdn.tsetmc.com/api/Index/GetIndexB1LastAll/All/1')
+    d = get('https://cdn.tsetmc.com/api/Index/GetIndexB1LastAll/All/1', timeout=8)
     for o in d.get('indexB1', []):
         if str(o.get('insCode')) == '32097828799138957':
             return {'TEDPIX': {'price': num(o.get('xDrNivJIdx004')), 'change': num(o.get('xVarIdxJRfV'))}}
@@ -128,7 +133,7 @@ def nobitex():
 def main():
     now = int(time.time() * 1000)
     items = {}
-    for name, fn in (('BrsApi', brsapi), ('tgju', tgju), ('TSETMC', tsetmc), ('Nobitex', nobitex)):
+    for name, fn in (('BrsApi', brsapi), ('TSETMC', tsetmc), ('tgju', tgju), ('Nobitex', nobitex)):
         got = try_source(name, fn)
         for sym, v in got.items():
             if v and v.get('price') and sym not in items:
