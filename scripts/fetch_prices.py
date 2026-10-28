@@ -172,7 +172,8 @@ def main():
     with open(os.path.join(OUT, 'history.json'), 'w', encoding='utf-8') as f:
         json.dump(history, f, separators=(',', ':'))
     print('\n'.join(log))
-    print('items:', {k: round(v['price']) for k, v in items.items()})
+    summary = ' | '.join(log) + ' || items: ' + json.dumps({k: round(v['price']) for k, v in items.items()})
+    print('::notice title=prices::' + summary.replace('\n', ' ')[:3000])
 
 
 if __name__ == '__main__':
