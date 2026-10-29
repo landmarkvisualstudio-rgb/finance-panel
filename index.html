@@ -24,12 +24,13 @@
         var t = s.theme || 'system';
         var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.documentElement.dataset.style = s.style === 'glass' ? 'glass' : 'liquid';
       } catch (e) { document.documentElement.dataset.theme = 'dark'; }
     })();
   </script>
 </head>
 <body>
-  <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="ambient" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
   <header class="topbar glass" id="topbar"></header>
   <nav class="tabbar glass" id="nav" aria-label="منوی اصلی"></nav>
   <main id="view" class="view"></main>

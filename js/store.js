@@ -23,7 +23,7 @@ const emptyData = () => ({
 
 export const store = {
   data: read(DATA_KEY, emptyData()),
-  settings: read(SETTINGS_KEY, { theme: 'system', brsKey: '', gistToken: '', gistId: '', pinHash: '' }),
+  settings: read(SETTINGS_KEY, { theme: 'system', style: 'liquid', brsKey: '', gistToken: '', gistId: '', pinHash: '' }),
   listeners: new Set(),
   on(fn) { this.listeners.add(fn); },
   emit(type) { this.listeners.forEach((fn) => fn(type)); },

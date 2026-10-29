@@ -71,6 +71,7 @@ body {
   font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden;
   font-feature-settings: 'ss01';
 }
+body { background: transparent; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 h1, h2, h3 { margin: 0; line-height: 1.35; }
@@ -92,6 +93,7 @@ code { font-size: 12px; background: var(--surface-2); padding: 2px 6px; border-r
 .ambient span:nth-child(1) { width: 52vmax; height: 52vmax; top: -18vmax; right: -12vmax; animation: drift 26s var(--ease) infinite alternate; }
 .ambient span:nth-child(2) { width: 40vmax; height: 40vmax; bottom: -16vmax; left: -10vmax; animation: drift 32s var(--ease) infinite alternate-reverse; }
 .ambient span:nth-child(3) { width: 24vmax; height: 24vmax; top: 40%; left: 40%; opacity: .7; animation: drift 22s var(--ease) infinite alternate; }
+.ambient span:nth-child(4) { display: none; }
 @keyframes drift { to { transform: translate(6vmax, 5vmax) scale(1.08); } }
 
 /* ---------- مادهٔ شیشه مایع ---------- */
@@ -519,3 +521,105 @@ code { font-size: 12px; background: var(--surface-2); padding: 2px 6px; border-r
 .install-btn.ready { background: var(--fg); color: var(--bg); }
 .install-steps { margin: 0 0 18px; padding-right: 22px; display: flex; flex-direction: column; gap: 10px; line-height: 1.8; }
 .install-steps b { font-weight: 800; }
+
+/* ============ سبک Glassmorphism: شیشه‌ی مات روی پس‌زمینه‌ی رنگی ============ */
+:root[data-style='glass'] {
+  --g1: #0080ff; --g2: #8b00ff; --g3: #ff1493; --g4: #20b2aa;
+}
+:root[data-style='glass'][data-theme='dark'] {
+  --bg: #0d0726;
+  --fg: #f5f3ff;
+  --fg-2: #ddd9ef;
+  --muted: #b3aecb;
+  --surface: rgba(255, 255, 255, 0.08);
+  --surface-solid: rgba(255, 255, 255, 0.14);
+  --surface-2: rgba(255, 255, 255, 0.10);
+  --stroke: rgba(255, 255, 255, 0.18);
+  --stroke-strong: rgba(255, 255, 255, 0.34);
+  --glass: rgba(255, 255, 255, 0.10);
+  --glass-heavy: rgba(22, 14, 52, 0.74);
+  --glass-hi: rgba(255, 255, 255, 0.32);
+  --glass-shadow: 0 12px 40px rgba(8, 0, 30, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --on-k: #0d0726;
+}
+:root[data-style='glass'][data-theme='light'] {
+  --bg: #ecebff;
+  --fg: #14102a;
+  --fg-2: #2b2645;
+  --muted: #514c6b;
+  --surface: rgba(255, 255, 255, 0.40);
+  --surface-solid: rgba(255, 255, 255, 0.78);
+  --surface-2: rgba(255, 255, 255, 0.45);
+  --stroke: rgba(255, 255, 255, 0.65);
+  --stroke-strong: rgba(255, 255, 255, 0.95);
+  --glass: rgba(255, 255, 255, 0.42);
+  --glass-heavy: rgba(255, 255, 255, 0.74);
+  --glass-hi: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 12px 40px rgba(60, 30, 140, 0.16), 0 2px 6px rgba(60, 30, 140, 0.08);
+}
+
+/* پس‌زمینه‌ی رنگی متحرک */
+[data-style='glass'] .ambient { background: linear-gradient(150deg, #1a0b4d 0%, #0d0726 55%, #04203a 100%); }
+[data-style='glass'][data-theme='light'] .ambient { background: linear-gradient(150deg, #dcd6ff 0%, #f3eaff 50%, #d6f4ff 100%); }
+[data-style='glass'] .ambient span { filter: blur(60px); opacity: .75; }
+[data-style='glass'][data-theme='light'] .ambient span { opacity: .55; }
+[data-style='glass'] .ambient span:nth-child(1) { background: var(--g1); width: 46vmax; height: 46vmax; }
+[data-style='glass'] .ambient span:nth-child(2) { background: var(--g2); }
+[data-style='glass'] .ambient span:nth-child(3) { background: var(--g3); width: 30vmax; height: 30vmax; top: 32%; left: 30%; opacity: .55; }
+[data-style='glass'] .ambient span:nth-child(4) {
+  display: block; background: var(--g4); width: 28vmax; height: 28vmax; bottom: 8%; right: -6vmax;
+  animation: drift 28s var(--ease) infinite alternate-reverse;
+}
+
+/* همه‌ی کارت‌ها شیشه‌ی مات */
+[data-style='glass'] :is(.card, .kpi, .rate-chip, .search, .select, .key, .date-btn, .mini-cal) {
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-hi);
+}
+[data-style='glass'] :is(.card, .kpi, .rate-chip) { border-color: var(--stroke); }
+[data-style='glass'] .list.card .row + .row { border-top-color: rgba(255, 255, 255, 0.10); }
+[data-style='glass'][data-theme='light'] .list.card .row + .row { border-top-color: rgba(20, 16, 42, 0.08); }
+
+/* کارت تراز: شیشه‌ی روشن‌تر با رنگ ملایم */
+[data-style='glass'] .hero {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.06));
+  color: var(--fg); border: 1px solid var(--stroke-strong);
+  -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-hi);
+}
+[data-style='glass'][data-theme='light'] .hero { background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.35)); }
+[data-style='glass'] .hero::after { background: radial-gradient(circle, rgba(255, 20, 147, .35), transparent 70%); }
+
+/* نشان‌ها با گرادیان */
+[data-style='glass'] :is(.logo, .glyph, .lock-ic) { background: linear-gradient(135deg, var(--g1), var(--g2) 60%, var(--g3)); color: #fff; }
+[data-style='glass'] .logo span { border-color: #fff; border-left-color: transparent; }
+[data-style='glass'] .fab:not([class*='k-']), [data-style='glass'] .fab.k-future,
+[data-style='glass'] .btn.primary:not([class*='k-']), [data-style='glass'] .btn.primary.k-future {
+  background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff;
+}
+[data-style='glass'] .cal-cell.sel { background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; }
+[data-style='glass'] .cal-cell.sel small, [data-style='glass'] .cal-cell.sel.off b { color: #fff; }
+[data-style='glass'] .chip.on { background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; border-color: transparent; }
+[data-style='glass'][data-theme='dark'] .select option { background: #1b1240; color: #f5f3ff; }
+
+/* انتخاب سبک در تنظیمات */
+.style-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.style-opt {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px; border-radius: 18px; text-align: right;
+  border: 1.5px solid var(--stroke); background: var(--surface-2); transition: border-color .2s, transform .25s var(--spring);
+}
+.style-opt:active { transform: scale(.97); }
+.style-opt.on { border-color: var(--fg); }
+.style-opt b { font-size: 14px; margin-top: 6px; align-self: stretch; text-align: right; }
+.style-opt small { font-size: 11.5px; color: var(--muted); }
+.sw { position: relative; display: block; width: 100%; aspect-ratio: 2 / 1; border-radius: 12px; overflow: hidden; }
+.sw i { position: absolute; inset: 22% 18%; border-radius: 10px; border: 1px solid rgba(255, 255, 255, .45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.sw-liquid { background: radial-gradient(circle at 30% 40%, #3a3a3e, #050506 70%); }
+.sw-liquid i { background: rgba(255, 255, 255, .10); }
+.sw-glass { background: radial-gradient(circle at 20% 30%, #0080ff, transparent 55%), radial-gradient(circle at 80% 70%, #ff1493, transparent 55%), linear-gradient(135deg, #8b00ff, #20b2aa); }
+.sw-glass i { background: rgba(255, 255, 255, .22); }
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-style='glass'] :is(.card, .kpi, .rate-chip, .search, .select, .key, .hero) { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--glass-heavy); }
+}

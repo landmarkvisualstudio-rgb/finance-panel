@@ -1,5 +1,5 @@
 // سرویس ورکر: پوسته برنامه آفلاین کار می‌کند؛ قیمت‌ها و همگام‌سازی همیشه از شبکه
-const VERSION = 'fp-v1.2.0';
+const VERSION = 'fp-v1.3.0';
 const SHELL = ['./', 'index.html', 'styles.css', 'manifest.webmanifest', 'js/app.js', 'js/store.js', 'js/sync.js', 'js/prices.js', 'js/charts.js', 'js/format.js', 'js/jalali.js', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {

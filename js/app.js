@@ -77,8 +77,10 @@ function toast(msg) {
 function applyTheme() {
   const pref = store.settings.theme;
   const dark = pref === 'dark' || (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+  const glass = store.settings.style === 'glass';
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  $('meta[name=theme-color]')?.setAttribute('content', dark ? '#050506' : '#f2f2f4');
+  document.documentElement.dataset.style = glass ? 'glass' : 'liquid';
+  $('meta[name=theme-color]')?.setAttribute('content', glass ? (dark ? '#140a33' : '#e9e6ff') : (dark ? '#050506' : '#f2f2f4'));
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
@@ -640,7 +642,14 @@ function viewSettings(v) {
       <button class="btn primary" id="installBtn2">${ic('download')} نصب اپ</button>
     </section>`}
     <section class="card settings">
-      <h3>ظاهر</h3>
+      <h3>سبک ظاهر</h3>
+      <div class="style-pick">
+        <button class="style-opt ${s.style !== 'glass' ? 'on' : ''}" data-ui-style="liquid" aria-pressed="${s.style !== 'glass'}">
+          <span class="sw sw-liquid"><i></i></span><b dir="ltr">Liquid Glass</b><small>سیاه و سفید، مینیمال</small></button>
+        <button class="style-opt ${s.style === 'glass' ? 'on' : ''}" data-ui-style="glass" aria-pressed="${s.style === 'glass'}">
+          <span class="sw sw-glass"><i></i></span><b dir="ltr">Glassmorphism</b><small>شیشه‌ی مات روی پس‌زمینه‌ی رنگی</small></button>
+      </div>
+      <h3>حالت روشن / تیره</h3>
       <div class="segmented theme-seg"><div class="seg-pill"></div>${[['system', 'خودکار'], ['light', 'روشن'], ['dark', 'تیره']].map(([k, l]) => `<button class="seg ${s.theme === k ? 'active' : ''}" data-theme="${k}">${l}</button>`).join('')}</div>
     </section>
 
@@ -692,6 +701,7 @@ function viewSettings(v) {
   bindCommon(v);
   $$('[data-theme]', v).forEach((b) => (b.onclick = () => { s.theme = b.dataset.theme; store.saveSettings(); applyTheme(); renderShell(); render(); }));
   placeSegPill($('.theme-seg', v));
+  $$('[data-ui-style]', v).forEach((b) => (b.onclick = () => { s.style = b.dataset.uiStyle; store.saveSettings(); applyTheme(); renderShell(); render(); }));
   $('#syncOn', v)?.addEventListener('click', async () => {
     const tok = $('#tok', v).value.trim();
     if (!tok) { toast('توکن را وارد کن'); return; }
